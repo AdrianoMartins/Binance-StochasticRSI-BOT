@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  stochrsi-bot:
+    container_name: stochrsi-trading-bot
+    image: adrianomartins/binance-stochastic-rsi-bot
+    restart: always
+    environment:
+      BINANCE_APIKEY: ""
+      BINANCE_SECRET_KEY: ""
+      TELEGRAM_TOKEN: ""
+      TELEGRAM_CHATID: ""
+      TRADE_COIN: "BUSD"
+      TRADE_CRYPTO: "CHZ"
+      TRADE_RSI_IFR: 14
+      TRADE_RSI_STOCH: 14
+      TRADE_RSI_K: 3
+      TRADE_RSI_D: 3
