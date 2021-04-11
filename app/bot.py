@@ -232,8 +232,9 @@ def main():
             crypto = settings.trade_crypto
 
             # Get Binance Data into dataframe
+            KLINE_INTERVAL = settings.trade_time_frame
             candles = client.get_klines(
-                symbol=crypto+alt, interval=Client.KLINE_INTERVAL_5MINUTE)
+                symbol=crypto+alt, interval=KLINE_INTERVAL)
             df = pd.DataFrame(candles)
             df.columns = ['timestart', 'open', 'high', 'low',
                           'close', '?', 'timeend', '?', '?', '?', '?', '?']
