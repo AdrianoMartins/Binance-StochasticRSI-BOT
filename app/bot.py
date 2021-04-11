@@ -100,9 +100,6 @@ def buy_alt(client: Client, alt, crypto, price, order_quantity):
     '''
     Buy
     '''
-    msg = f"Purchasing {order_quantity} of {crypto} at {price} {alt}"
-    telegram_bot_sendtext(msg)
-    print(msg)
 
     # Try to buy until successful
     order = None
@@ -164,9 +161,6 @@ def sell_alt(client: Client, alt, crypto, price, order_quantity):
     '''
     Sell
     '''
-    msg = f"Selling {order_quantity} of {crypto} at {price} {alt}"
-    telegram_bot_sendtext(msg)
-    print(msg)
 
     bal = get_currency_balance(client, crypto)
     print('Balance is {0}'.format(bal))
@@ -302,9 +296,17 @@ def main():
                         order_quantity = ((math.floor(get_currency_balance(
                             client, alt) * 10 ** ticks[alt] / float(newestcandleclose)) / float(10 ** ticks[alt])))
                         if order_quantity > 0:
-                            while result is None:
-                                result = buy_alt(
-                                    client, alt, crypto, newestcandleclose, order_quantity)
+                            if bool(settings.notification_only):
+                                msg = f"Notification: Buy {order_quantity} of {crypto} at {price} {alt}"
+                                telegram_bot_sendtext(msg)
+                                print(msg)
+                            else:
+                                msg = f"Purchasing {order_quantity} of {crypto} at {price} {alt}"
+                                telegram_bot_sendtext(msg)
+                                print(msg)
+                                while result is None:
+                                    result = buy_alt(
+                                        client, alt, crypto, newestcandleclose, order_quantity)
 
             elif float(newestcandleD) > (float(newestcandleK) + 1):
                 if lastStatus != 2:
@@ -325,9 +327,17 @@ def main():
                         order_quantity = math.floor(
                             get_currency_balance(client, crypto))
                         if order_quantity > 0:
-                            while result is None:
-                                result = sell_alt(
-                                    client, alt, crypto, newestcandleclose, order_quantity)
+                            if bool(settings.notification_only):
+                                msg = f"Notification: Sell {order_quantity} of {crypto} at {price} {alt}"
+                                telegram_bot_sendtext(msg)
+                                print(msg)
+                            else:
+                                msg = f"Selling {order_quantity} of {crypto} at {price} {alt}"
+                                telegram_bot_sendtext(msg)
+                                print(msg)
+                                while result is None:
+                                    result = sell_alt(
+                                        client, alt, crypto, newestcandleclose, order_quantity)
 
             time.sleep(5)
 

@@ -18,3 +18,4 @@ services:
       TRADE_RSI_STOCH: 14
       TRADE_RSI_K: 3
       TRADE_RSI_D: 3
+      NOTIFICATION_ONLY: 0
