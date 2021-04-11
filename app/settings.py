@@ -10,6 +10,7 @@ telegram_chatid = getenv('TELEGRAM_CHATID', '')
 trade_coin = getenv('TRADE_COIN', 'BUSD')
 trade_crypto = getenv('TRADE_CRYPTO', 'CHZ')
 trade_time_frame = getenv('TRADE_TIME_FRAME', "15m")
+trade_market = getenv('TRADE_MARKET', 0)
 
 trade_rsi_ifr=int(getenv('TRADE_RSI_IFR', 14))
 trade_rsi_stochastic=int(getenv('TRADE_RSI_STOCH', 14))

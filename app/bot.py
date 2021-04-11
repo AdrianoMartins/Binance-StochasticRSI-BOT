@@ -107,11 +107,17 @@ def buy_alt(client: Client, alt, crypto, price, order_quantity):
     order = None
     while order is None:
         try:
-            order = client.order_limit_buy(
-                symbol=crypto + alt,
-                quantity=order_quantity,
-                price=price
-            )
+            if bool(settings.trade_market):
+                order = client.order_market_buy(
+                    symbol=crypto + alt,
+                    quantity=order_quantity
+                )
+            else:
+                order = client.order_limit_buy(
+                    symbol=crypto + alt,
+                    quantity=order_quantity,
+                    price=price
+                )
         except BinanceAPIException as e:
             print(e)
             time.sleep(1)
@@ -165,11 +171,17 @@ def sell_alt(client: Client, alt, crypto, price, order_quantity):
     print('Balance is {0}'.format(bal))
     order = None
     while order is None:
-        order = client.order_limit_sell(
-            symbol=crypto + alt,
-            quantity=(order_quantity),
-            price=price
-        )
+        if bool(settings.trade_market):
+            order = client.order_market_sell(
+                symbol=crypto + alt,
+                quantity=(order_quantity)
+            )
+        else:
+            order = client.order_limit_sell(
+                symbol=crypto + alt,
+                quantity=(order_quantity),
+                price=price
+            )
 
     # Binance server can take some time to save the order
     print("Waiting for Binance")
