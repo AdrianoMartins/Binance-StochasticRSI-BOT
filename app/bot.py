@@ -105,7 +105,7 @@ def buy_alt(client: Client, alt, crypto, price, order_quantity):
     order = None
     while order is None:
         try:
-            if bool(settings.trade_market):
+            if int(settings.trade_market) == 1:
                 order = client.order_market_buy(
                     symbol=crypto + alt,
                     quantity=order_quantity
@@ -166,7 +166,7 @@ def sell_alt(client: Client, alt, crypto, price, order_quantity):
     print('Balance is {0}'.format(bal))
     order = None
     while order is None:
-        if bool(settings.trade_market):
+        if int(settings.trade_market) == 1:
             order = client.order_market_sell(
                 symbol=crypto + alt,
                 quantity=(order_quantity)
@@ -278,66 +278,63 @@ def main():
                   + newestcandleD)
 
             result = None
-            startRun = True if lastStatus == 0 else False
             if (float(newestcandleD) + 1) < float(newestcandleK):
                 if lastStatus != 1:
                     lastStatus = 1
-                    if not startRun:
-                        msg = f"BUY - Price: {newestcandleclose} (K {newestcandleD} < {newestcandleK} D)"
-                        print(msg)
-                        ticks = {}
-                        for filt in client.get_symbol_info(crypto + alt)['filters']:
-                            if filt['filterType'] == 'LOT_SIZE':
-                                if filt['stepSize'].find('1') == 0:
-                                    ticks[alt] = 1 - filt['stepSize'].find('.')
-                                else:
-                                    ticks[alt] = filt['stepSize'].find('1') - 1
-                                break
-                        order_quantity = ((math.floor(get_currency_balance(
-                            client, alt) * 10 ** ticks[alt] / float(newestcandleclose)) / float(10 ** ticks[alt])))
-                        if order_quantity > 0:
-                            if bool(settings.notification_only):
-                                msg = f"Notification: Buy {order_quantity} of {crypto} at {price} {alt}"
-                                telegram_bot_sendtext(msg)
-                                print(msg)
+                    msg = f"BUY - Price: {newestcandleclose} (K {newestcandleD} < {newestcandleK} D)"
+                    print(msg)
+                    ticks = {}
+                    for filt in client.get_symbol_info(crypto + alt)['filters']:
+                        if filt['filterType'] == 'LOT_SIZE':
+                            if filt['stepSize'].find('1') == 0:
+                                ticks[alt] = 1 - filt['stepSize'].find('.')
                             else:
-                                msg = f"Purchasing {order_quantity} of {crypto} at {price} {alt}"
-                                telegram_bot_sendtext(msg)
-                                print(msg)
-                                while result is None:
-                                    result = buy_alt(
-                                        client, alt, crypto, newestcandleclose, order_quantity)
+                                ticks[alt] = filt['stepSize'].find('1') - 1
+                            break
+                    order_quantity = ((math.floor(get_currency_balance(
+                        client, alt) * 10 ** ticks[alt] / float(newestcandleclose)) / float(10 ** ticks[alt])))
+                    if order_quantity > 0:
+                        if int(settings.notification_only) == 1:
+                            msg = f"Notification: Buy {order_quantity} of {crypto} at {newestcandleclose} {alt}"
+                            telegram_bot_sendtext(msg)
+                            print(msg)
+                        else:
+                            msg = f"Purchasing {order_quantity} of {crypto} at {newestcandleclose} {alt}"
+                            telegram_bot_sendtext(msg)
+                            print(msg)
+                            while result is None:
+                                result = buy_alt(
+                                    client, alt, crypto, newestcandleclose, order_quantity)
 
             elif float(newestcandleD) > (float(newestcandleK) + 1):
                 if lastStatus != 2:
                     lastStatus = 2
-                    if not startRun:
-                        msg = f"SELL - Price: {newestcandleclose} (K {newestcandleD} > {newestcandleK} D)"
-                        print(msg)
-                        ticks = {}
-                        for filt in client.get_symbol_info(crypto + alt)['filters']:
-                            if filt['filterType'] == 'LOT_SIZE':
-                                if filt['stepSize'].find('1') == 0:
-                                    ticks[alt] = 1 - \
-                                        filt['stepSize'].find('.')
-                                else:
-                                    ticks[alt] = filt['stepSize'].find(
-                                        '1') - 1
-                                break
-                        order_quantity = math.floor(
-                            get_currency_balance(client, crypto))
-                        if order_quantity > 0:
-                            if bool(settings.notification_only):
-                                msg = f"Notification: Sell {order_quantity} of {crypto} at {price} {alt}"
-                                telegram_bot_sendtext(msg)
-                                print(msg)
+                    msg = f"SELL - Price: {newestcandleclose} (K {newestcandleD} > {newestcandleK} D)"
+                    print(msg)
+                    ticks = {}
+                    for filt in client.get_symbol_info(crypto + alt)['filters']:
+                        if filt['filterType'] == 'LOT_SIZE':
+                            if filt['stepSize'].find('1') == 0:
+                                ticks[alt] = 1 - \
+                                    filt['stepSize'].find('.')
                             else:
-                                msg = f"Selling {order_quantity} of {crypto} at {price} {alt}"
-                                telegram_bot_sendtext(msg)
-                                print(msg)
-                                while result is None:
-                                    result = sell_alt(
-                                        client, alt, crypto, newestcandleclose, order_quantity)
+                                ticks[alt] = filt['stepSize'].find(
+                                    '1') - 1
+                            break
+                    order_quantity = math.floor(
+                        get_currency_balance(client, crypto))
+                    if order_quantity > 0:
+                        if int(settings.notification_only) == 1:
+                            msg = f"Notification: Sell {order_quantity} of {crypto} at {newestcandleclose} {alt}"
+                            telegram_bot_sendtext(msg)
+                            print(msg)
+                        else:
+                            msg = f"Selling {order_quantity} of {crypto} at {newestcandleclose} {alt}"
+                            telegram_bot_sendtext(msg)
+                            print(msg)
+                            while result is None:
+                                result = sell_alt(
+                                    client, alt, crypto, newestcandleclose, order_quantity)
 
             time.sleep(5)
 
