@@ -285,7 +285,7 @@ def main():
 
             result = None
             startRun = True if lastStatus == 0 else False
-            if newestcandleD < newestcandleK:
+            if (float(newestcandleD) + 1) < float(newestcandleK):
                 if lastStatus != 1:
                     lastStatus = 1
                     if not startRun:
@@ -306,7 +306,7 @@ def main():
                                 result = buy_alt(
                                     client, alt, crypto, newestcandleclose, order_quantity)
 
-            elif newestcandleD > newestcandleK:
+            elif float(newestcandleD) > (float(newestcandleK) + 1):
                 if lastStatus != 2:
                     lastStatus = 2
                     if not startRun:
