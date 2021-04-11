@@ -11,11 +11,11 @@ services:
       TELEGRAM_TOKEN: ""
       TELEGRAM_CHATID: ""
       TRADE_TIME_FRAME: "15m" # 1m, 5m, 15m, 1h, 6h, etc.
-      TRADE_MARKET: 0
+      TRADE_MARKET: 1
       TRADE_COIN: "BUSD"
-      TRADE_CRYPTO: "CHZ"
+      TRADE_CRYPTO: "BTC"
       TRADE_RSI_IFR: 14
       TRADE_RSI_STOCH: 14
-      TRADE_RSI_K: 3
+      TRADE_RSI_K: 1
       TRADE_RSI_D: 3
       NOTIFICATION_ONLY: 0
