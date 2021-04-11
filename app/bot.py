@@ -308,29 +308,26 @@ def main():
 
             elif newestcandleD > newestcandleK:
                 if lastStatus != 2:
-                    if lastStatus == 1:
-                        lastStatus = 2
-                        if not startRun:
-                            msg = f"SELL - Price: {newestcandleclose} (K {newestcandleD} > {newestcandleK} D)"
-                            print(msg)
-                            ticks = {}
-                            for filt in client.get_symbol_info(crypto + alt)['filters']:
-                                if filt['filterType'] == 'LOT_SIZE':
-                                    if filt['stepSize'].find('1') == 0:
-                                        ticks[alt] = 1 - \
-                                            filt['stepSize'].find('.')
-                                    else:
-                                        ticks[alt] = filt['stepSize'].find(
-                                            '1') - 1
-                                    break
-                            order_quantity = math.floor(
-                                get_currency_balance(client, crypto))
-                            if order_quantity > 0:
-                                while result is None:
-                                    result = sell_alt(
-                                        client, alt, crypto, newestcandleclose, order_quantity)
-                    else:
-                        lastStatus = 2
+                    lastStatus = 2
+                    if not startRun:
+                        msg = f"SELL - Price: {newestcandleclose} (K {newestcandleD} > {newestcandleK} D)"
+                        print(msg)
+                        ticks = {}
+                        for filt in client.get_symbol_info(crypto + alt)['filters']:
+                            if filt['filterType'] == 'LOT_SIZE':
+                                if filt['stepSize'].find('1') == 0:
+                                    ticks[alt] = 1 - \
+                                        filt['stepSize'].find('.')
+                                else:
+                                    ticks[alt] = filt['stepSize'].find(
+                                        '1') - 1
+                                break
+                        order_quantity = math.floor(
+                            get_currency_balance(client, crypto))
+                        if order_quantity > 0:
+                            while result is None:
+                                result = sell_alt(
+                                    client, alt, crypto, newestcandleclose, order_quantity)
 
             time.sleep(5)
 
