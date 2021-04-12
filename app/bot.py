@@ -238,10 +238,12 @@ def main():
             alt = settings.trade_coin
             crypto = settings.trade_crypto
 
+            symbol = f"{crypto}{alt}"
+
             # Get Binance Data into dataframe
             KLINE_INTERVAL = settings.trade_time_frame
             candles = client.get_klines(
-                symbol=crypto+alt, interval=KLINE_INTERVAL)
+                symbol=symbol, interval=KLINE_INTERVAL)
             df = pd.DataFrame(candles)
             df.columns = ['timestart', 'open', 'high', 'low',
                           'close', '?', 'timeend', '?', '?', '?', '?', '?']
@@ -281,7 +283,8 @@ def main():
             if newestcandleK > newestcandleD:
                 if lastStatus != 1:
                     lastStatus = 1
-                    msg = f"BUY - Price: {newestcandleclose} (K {newestcandleD} < {newestcandleK} D)"
+                    asks_lowest = client.get_orderbook_ticker(symbol=symbol)['askPrice']
+                    msg = f"BUY - Price: {asks_lowest} (K {newestcandleD} < {newestcandleK} D)"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
@@ -292,24 +295,25 @@ def main():
                                 ticks[alt] = filt['stepSize'].find('1') - 1
                             break
                     order_quantity = ((math.floor(get_currency_balance(
-                        client, alt) * 10 ** ticks[alt] / float(newestcandleclose)) / float(10 ** ticks[alt])))
+                        client, alt) * 10 ** ticks[alt] / float(asks_lowest)) / float(10 ** ticks[alt])))
                     if order_quantity > 0:
                         if int(settings.notification_only) == 1:
-                            msg = f"Notification: Buy {order_quantity} of {crypto} at {newestcandleclose} {alt}"
+                            msg = f"Notification: Buy {order_quantity} of {crypto} at {asks_lowest} {alt}"
                             telegram_bot_sendtext(msg)
                             print(msg)
                         else:
-                            msg = f"Purchasing {order_quantity} of {crypto} at {newestcandleclose} {alt}"
+                            msg = f"Purchasing {order_quantity} of {crypto} at {asks_lowest} {alt}"
                             telegram_bot_sendtext(msg)
                             print(msg)
                             while result is None:
                                 result = buy_alt(
-                                    client, alt, crypto, newestcandleclose, order_quantity)
+                                    client, alt, crypto, asks_lowest, order_quantity)
 
             elif newestcandleD > newestcandleK:
                 if lastStatus != 2:
                     lastStatus = 2
-                    msg = f"SELL - Price: {newestcandleclose} (K {newestcandleD} > {newestcandleK} D)"
+                    bids_highest = client.get_orderbook_ticker(symbol=symbol)['bidPrice']
+                    msg = f"SELL - Price: {bids_highest} (K {newestcandleD} > {newestcandleK} D)"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
@@ -325,16 +329,16 @@ def main():
                         get_currency_balance(client, crypto))
                     if order_quantity > 0:
                         if int(settings.notification_only) == 1:
-                            msg = f"Notification: Sell {order_quantity} of {crypto} at {newestcandleclose} {alt}"
+                            msg = f"Notification: Sell {order_quantity} of {crypto} at {bids_highest} {alt}"
                             telegram_bot_sendtext(msg)
                             print(msg)
                         else:
-                            msg = f"Selling {order_quantity} of {crypto} at {newestcandleclose} {alt}"
+                            msg = f"Selling {order_quantity} of {crypto} at {bids_highest} {alt}"
                             telegram_bot_sendtext(msg)
                             print(msg)
                             while result is None:
                                 result = sell_alt(
-                                    client, alt, crypto, newestcandleclose, order_quantity)
+                                    client, alt, crypto, bids_highest, order_quantity)
 
             time.sleep(5)
 
