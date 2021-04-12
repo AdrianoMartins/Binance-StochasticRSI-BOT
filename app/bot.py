@@ -278,7 +278,7 @@ def main():
                   + newestcandleD)
 
             result = None
-            if (float(newestcandleD) + 1) < float(newestcandleK):
+            if newestcandleK > newestcandleD:
                 if lastStatus != 1:
                     lastStatus = 1
                     msg = f"BUY - Price: {newestcandleclose} (K {newestcandleD} < {newestcandleK} D)"
@@ -306,7 +306,7 @@ def main():
                                 result = buy_alt(
                                     client, alt, crypto, newestcandleclose, order_quantity)
 
-            elif float(newestcandleD) > (float(newestcandleK) + 1):
+            elif newestcandleD > newestcandleK:
                 if lastStatus != 2:
                     lastStatus = 2
                     msg = f"SELL - Price: {newestcandleclose} (K {newestcandleD} > {newestcandleK} D)"
