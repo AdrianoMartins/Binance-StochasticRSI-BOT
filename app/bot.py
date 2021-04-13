@@ -219,16 +219,6 @@ def sell_alt(client: Client, alt, crypto, price, order_quantity):
 
     return order
 
-def getDiffer(k, d):
-    if float(k) == float(d):
-        return 0
-    try:
-        return (abs(float(k) - float(d)) / float(d)) * 100.0
-    except ZeroDivisionError:
-        return 0
-
-def is_between(a, x, b):
-    return min(a, b) < x < max(a, b)
 
 def main():
     print('Started')
@@ -290,7 +280,7 @@ def main():
                   + newestcandleD)
 
             result = None
-            if (newestcandleK > newestcandleD) and (getDiffer(newestcandleK, newestcandleD) > float(settings.trade_percentual_change)) and (is_between(settings.trade_between_max, newestcandleK, settings.trade_between_min) and is_between(settings.trade_between_min, newestcandleD, settings.trade_between_max)):
+            if newestcandleK > newestcandleD:
                 if lastStatus != 1:
                     lastStatus = 1
                     asks_lowest = client.get_orderbook_ticker(symbol=symbol)['askPrice']
@@ -319,7 +309,7 @@ def main():
                                 result = buy_alt(
                                     client, alt, crypto, asks_lowest, order_quantity)
 
-            elif (newestcandleK < newestcandleD) and (getDiffer(newestcandleK, newestcandleD) > float(settings.trade_percentual_change)) and (is_between(settings.trade_between_max, newestcandleK, settings.trade_between_min) and is_between(settings.trade_between_min, newestcandleD, settings.trade_between_max)):
+            elif newestcandleK < newestcandleD:
                 if lastStatus != 2:
                     lastStatus = 2
                     bids_highest = client.get_orderbook_ticker(symbol=symbol)['bidPrice']
