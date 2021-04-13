@@ -284,7 +284,7 @@ def main():
                 if lastStatus != 1:
                     lastStatus = 1
                     asks_lowest = client.get_orderbook_ticker(symbol=symbol)['askPrice']
-                    msg = f"BUY - Price: {asks_lowest} (K {newestcandleD} < {newestcandleK} D)"
+                    msg = f"BUY - Price: {asks_lowest} (K {newestcandleK} > {newestcandleD} D)"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
@@ -309,11 +309,11 @@ def main():
                                 result = buy_alt(
                                     client, alt, crypto, asks_lowest, order_quantity)
 
-            elif newestcandleD > newestcandleK:
+            elif newestcandleK < newestcandleD:
                 if lastStatus != 2:
                     lastStatus = 2
                     bids_highest = client.get_orderbook_ticker(symbol=symbol)['bidPrice']
-                    msg = f"SELL - Price: {bids_highest} (K {newestcandleD} > {newestcandleK} D)"
+                    msg = f"SELL - Price: {bids_highest} (K {newestcandleK} < {newestcandleD} D)"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
