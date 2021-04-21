@@ -267,23 +267,26 @@ def main():
                 str).iloc[-1]  # gets last time
             newestcandleend = df.timeend.astype(
                 str).iloc[-1]  # gets current time?
-            newestcandleclose = df.close.iloc[-1]  # gets last close
-            newestcandleRSI = df.rsi.astype(str).iloc[-1]  # gets last rsi
-            newestcandleK = df.MyStochrsiK.astype(
-                str).iloc[-1]  # gets last rsi
-            newestcandleD = df.MyStochrsiD.astype(
-                str).iloc[-1]  # gets last rsi
+            newestcandleclose = round(
+                float(df.close.iloc[-1]), 4)  # gets last close
+            newestcandleRSI = round(
+                float(df.rsi.astype(str).iloc[-1]), 4)  # gets last rsi
+            newestcandleK = round(float(df.MyStochrsiK.astype(
+                str).iloc[-1]), 4)  # gets last rsi
+            newestcandleD = round(float(df.MyStochrsiD.astype(
+                str).iloc[-1]), 4)  # gets last rsi
 
-            print("Price: " + newestcandleclose + " RSI: "
-                  + newestcandleRSI + " %K: "
-                  + newestcandleK + " %D: "
-                  + newestcandleD)
+            print("Price: " + str(newestcandleclose) + " RSI: "
+                  + str(newestcandleRSI) + " %K: "
+                  + str(newestcandleK) + " %D: "
+                  + str(newestcandleD))
 
             result = None
             if newestcandleK > newestcandleD:
                 if lastStatus != 1:
                     lastStatus = 1
-                    asks_lowest = client.get_orderbook_ticker(symbol=symbol)['askPrice']
+                    asks_lowest = client.get_orderbook_ticker(symbol=symbol)[
+                        'askPrice']
                     msg = f"BUY - Price: {asks_lowest} (K {newestcandleK} > {newestcandleD} D)"
                     print(msg)
                     ticks = {}
@@ -312,7 +315,8 @@ def main():
             elif newestcandleK < newestcandleD:
                 if lastStatus != 2:
                     lastStatus = 2
-                    bids_highest = client.get_orderbook_ticker(symbol=symbol)['bidPrice']
+                    bids_highest = client.get_orderbook_ticker(symbol=symbol)[
+                        'bidPrice']
                     msg = f"SELL - Price: {bids_highest} (K {newestcandleK} < {newestcandleD} D)"
                     print(msg)
                     ticks = {}
