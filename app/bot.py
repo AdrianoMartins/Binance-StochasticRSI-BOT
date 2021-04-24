@@ -321,7 +321,7 @@ def main():
                     lastStatus = 2
                     bids_highest = round(
                         float(client.get_orderbook_ticker(symbol=symbol)['bidPrice']), 4)
-                    msg = f"{bcolors.ALERT}SELL - Price Book: {bids_highest} (%K: {newestcandleK} < %D: {newestcandleD} ) and EMA {settings.trade_ema_low}: {emaLow} <  EMA {settings.trade_ema_high}: {emaHigh}){bcolors.ENDC}"
+                    msg = f"{bcolors.ALERT}SELL - Price Book: {bids_highest} (%K: {newestcandleK} < %D: {newestcandleD} and EMA {settings.trade_ema_low}: {emaLow} <  EMA {settings.trade_ema_high}: {emaHigh}){bcolors.ENDC}"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
