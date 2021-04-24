@@ -32,8 +32,6 @@ def telegram_bot_sendtext(bot_message):
         response = requests.get(send_text)
         return response.json()
 
-# StochasticRSI Function
-
 
 def Stoch(close, high, low, smoothk, smoothd, n):
     lowestlow = pd.Series.rolling(low, window=n, center=False).min()
@@ -264,12 +262,6 @@ def main():
                                settings.trade_rsi_d, settings.trade_rsi_stochastic)
             df['MyStochrsiK'], df['MyStochrsiD'] = mystochrsi
 
-            # Compute EMAs
-            emaLow = round(
-                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_low)).iloc[-1]), 4)
-            emaHigh = round(
-                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 4)
-
             newestcandlestart = df.timestart.astype(
                 str).iloc[-1]  # gets last time
             newestcandleend = df.timeend.astype(
@@ -282,6 +274,12 @@ def main():
                 str).iloc[-1]), 4)  # gets last rsi
             newestcandleD = round(float(df.MyStochrsiD.astype(
                 str).iloc[-1]), 4)  # gets last rsi
+
+            # Compute EMAs
+            emaLow = round(
+                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_low)).iloc[-1]), 4)
+            emaHigh = round(
+                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 4)
 
             print(f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - %K: {newestcandleK} - %D: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh}")
 
@@ -315,7 +313,6 @@ def main():
                             while result is None:
                                 result = buy_alt(
                                     client, alt, crypto, asks_lowest, order_quantity)
-
             elif (newestcandleK < newestcandleD) and (emaLow < emaHigh):
                 if lastStatus != 2:
                     lastStatus = 2
