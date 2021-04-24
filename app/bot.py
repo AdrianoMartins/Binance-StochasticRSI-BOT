@@ -296,20 +296,14 @@ def main():
             
             if settings.trade_ema_base_candle:
                 lastClose = df.timeend.iloc[-1]
-                # print('lastClose: '+str(lastClose))
                 if lastClose != lastCloseTrade:
-                    # print(f'lastCloseTrade: {str(lastClose)} {str(lastCloseTrade)}')
                     lastCloseTrade = lastClose
                     if newestcandleclose > emaBaseClosed:
-                        # print('lastCloseUpSUM: '+str(lastCloseUpSUM))
                         lastCloseUpSUM = lastCloseUpSUM + 1
-                        # print('lastCloseUpSUM: '+str(lastCloseUpSUM))
                     else:
                         lastCloseUpSUM = 0
                     if newestcandleclose < emaBaseClosed:
-                        # print('lastCloseDownSUM: '+str(lastCloseDownSUM))
                         lastCloseDownSUM = lastCloseDownSUM + 1
-                        # print('lastCloseDownSUM: '+str(lastCloseDownSUM))
                     else:
                         lastCloseDownSUM = 0
                 else:
