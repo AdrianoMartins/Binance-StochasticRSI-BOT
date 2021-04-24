@@ -303,7 +303,7 @@ def main():
                             break
                     order_quantity = ((math.floor(get_currency_balance(
                         client, alt) * 10 ** ticks[alt] / float(asks_lowest)) / float(10 ** ticks[alt])))
-                    if order_quantity > 0:
+                    if order_quantity > 0 or int(settings.notification_only) == 1:
                         if int(settings.notification_only) == 1:
                             msg = f"Notification: Buy {order_quantity} of {crypto} at {asks_lowest} {alt}"
                             telegram_bot_sendtext(msg)
@@ -335,7 +335,7 @@ def main():
                             break
                     order_quantity = math.floor(
                         get_currency_balance(client, crypto))
-                    if order_quantity > 0:
+                    if order_quantity > 0 or int(settings.notification_only) == 1:
                         if int(settings.notification_only) == 1:
                             msg = f"Notification: Sell {order_quantity} of {crypto} at {bids_highest} {alt}"
                             telegram_bot_sendtext(msg)
