@@ -231,6 +231,11 @@ def main():
     client = Client(api_key, api_secret_key, tld=tld)
 
     lastStatus = 0
+    lastCloseTrade = None
+    lastCloseUpSUM = 0
+    lastCloseDownSUM = 0
+    validateBuy = False
+    validateSell = False
 
     while True:
         try:
@@ -280,16 +285,51 @@ def main():
                 float((talib.EMA(df['close'], timeperiod=settings.trade_ema_low)).iloc[-1]), 4)
             emaHigh = round(
                 float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 4)
+            emaBaseClosed = round(
+                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_base_candle_value)).iloc[-1]), 4)
 
-            print(f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - %K: {newestcandleK} - %D: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh}")
+            print(f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - %K: {newestcandleK} - %D: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh} - EMA {settings.trade_ema_base_candle_value}: {emaBaseClosed}")
+
+            if settings.trade_ema_cross:
+                validateBuy = (newestcandleK > newestcandleD) and (emaLow > emaHigh)
+                validateSell = (newestcandleK < newestcandleD) and (emaLow < emaHigh)
+            
+            if settings.trade_ema_base_candle:
+                lastClose = df.timeend.iloc[-1]
+                # print('lastClose: '+str(lastClose))
+                if lastClose != lastCloseTrade:
+                    # print(f'lastCloseTrade: {str(lastClose)} {str(lastCloseTrade)}')
+                    lastCloseTrade = lastClose
+                    if newestcandleclose > emaBaseClosed:
+                        # print('lastCloseUpSUM: '+str(lastCloseUpSUM))
+                        lastCloseUpSUM = lastCloseUpSUM + 1
+                        # print('lastCloseUpSUM: '+str(lastCloseUpSUM))
+                    else:
+                        lastCloseUpSUM = 0
+                    if newestcandleclose < emaBaseClosed:
+                        # print('lastCloseDownSUM: '+str(lastCloseDownSUM))
+                        lastCloseDownSUM = lastCloseDownSUM + 1
+                        # print('lastCloseDownSUM: '+str(lastCloseDownSUM))
+                    else:
+                        lastCloseDownSUM = 0
+                else:
+                    pass
+                if lastCloseUpSUM == settings.trade_ema_base_candle_qtd:
+                    validateBuy = (newestcandleK > newestcandleD)
+                if lastCloseDownSUM == settings.trade_ema_base_candle_qtd:
+                    validateSell = (newestcandleK < newestcandleD)
+            
+            if not settings.trade_ema_base_candle and not settings.trade_ema_cross:
+                validateBuy = (newestcandleK > newestcandleD)
+                validateSell = (newestcandleK < newestcandleD)
 
             result = None
-            if (newestcandleK > newestcandleD) and (emaLow > emaHigh):
+            if validateBuy:
                 if lastStatus != 1:
                     lastStatus = 1
                     asks_lowest = round(
                         float(client.get_orderbook_ticker(symbol=symbol)['askPrice']), 4)
-                    msg = f"{bcolors.OKGREEN}BUY - Price Book: {asks_lowest} (%K {newestcandleK} > %D {newestcandleD} and EMA {settings.trade_ema_low} {emaLow} >  EMA {settings.trade_ema_high} {emaHigh}){bcolors.ENDC}"
+                    msg = f"{bcolors.OKGREEN}BUY - Price Book: {asks_lowest}{bcolors.ENDC}"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
@@ -313,12 +353,12 @@ def main():
                             while result is None:
                                 result = buy_alt(
                                     client, alt, crypto, asks_lowest, order_quantity)
-            elif (newestcandleK < newestcandleD) and (emaLow < emaHigh):
+            elif validateSell:
                 if lastStatus != 2:
                     lastStatus = 2
                     bids_highest = round(
                         float(client.get_orderbook_ticker(symbol=symbol)['bidPrice']), 4)
-                    msg = f"{bcolors.ALERT}SELL - Price Book: {bids_highest} (%K: {newestcandleK} < %D: {newestcandleD} and EMA {settings.trade_ema_low}: {emaLow} <  EMA {settings.trade_ema_high}: {emaHigh}){bcolors.ENDC}"
+                    msg = f"{bcolors.ALERT}SELL - Price Book: {bids_highest}{bcolors.ENDC}"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
