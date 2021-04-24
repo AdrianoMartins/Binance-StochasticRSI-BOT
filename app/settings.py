@@ -17,4 +17,7 @@ trade_rsi_stochastic=int(getenv('TRADE_RSI_STOCH', 14))
 trade_rsi_k=int(getenv('TRADE_RSI_K', 3))
 trade_rsi_d=int(getenv('TRADE_RSI_D', 3))
 
+trade_ema_low=int(getenv('TRADE_EMA_LOW', 3))
+trade_ema_high=int(getenv('TRADE_EMA_HIGH', 6))
+
 notification_only=getenv('NOTIFICATION_ONLY', 0)

@@ -18,4 +18,6 @@ services:
       TRADE_RSI_STOCH: 14
       TRADE_RSI_K: 1
       TRADE_RSI_D: 3
-      NOTIFICATION_ONLY: 0
+      TRADE_EMA_LOW: 3
+      TRADE_EMA_HIGH: 6
+      NOTIFICATION_ONLY: 1

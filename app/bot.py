@@ -20,6 +20,7 @@ from binance.client import Client
 from binance.exceptions import BinanceAPIException
 
 import settings
+from colors import bcolors
 
 
 def telegram_bot_sendtext(bot_message):
@@ -263,6 +264,12 @@ def main():
                                settings.trade_rsi_d, settings.trade_rsi_stochastic)
             df['MyStochrsiK'], df['MyStochrsiD'] = mystochrsi
 
+            # Compute EMAs
+            emaLow = round(
+                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_low)).iloc[-1]), 4)
+            emaHigh = round(
+                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 4)
+
             newestcandlestart = df.timestart.astype(
                 str).iloc[-1]  # gets last time
             newestcandleend = df.timeend.astype(
@@ -276,18 +283,15 @@ def main():
             newestcandleD = round(float(df.MyStochrsiD.astype(
                 str).iloc[-1]), 4)  # gets last rsi
 
-            print("Price: " + str(newestcandleclose) + " RSI: "
-                  + str(newestcandleRSI) + " %K: "
-                  + str(newestcandleK) + " %D: "
-                  + str(newestcandleD))
+            print(f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - %K: {newestcandleK} - %D: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh}")
 
             result = None
-            if newestcandleK > newestcandleD:
+            if (newestcandleK > newestcandleD) and (emaLow > emaHigh):
                 if lastStatus != 1:
                     lastStatus = 1
-                    asks_lowest = client.get_orderbook_ticker(symbol=symbol)[
-                        'askPrice']
-                    msg = f"BUY - Price: {asks_lowest} (K {newestcandleK} > {newestcandleD} D)"
+                    asks_lowest = round(
+                        float(client.get_orderbook_ticker(symbol=symbol)['askPrice']), 4)
+                    msg = f"{bcolors.OKGREEN}BUY - Price Book: {asks_lowest} (%K {newestcandleK} > %D {newestcandleD} and EMA {settings.trade_ema_low} {emaLow} >  EMA {settings.trade_ema_high} {emaHigh}){bcolors.ENDC}"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
@@ -312,12 +316,12 @@ def main():
                                 result = buy_alt(
                                     client, alt, crypto, asks_lowest, order_quantity)
 
-            elif newestcandleK < newestcandleD:
+            elif (newestcandleK < newestcandleD) and (emaLow < emaHigh):
                 if lastStatus != 2:
                     lastStatus = 2
-                    bids_highest = client.get_orderbook_ticker(symbol=symbol)[
-                        'bidPrice']
-                    msg = f"SELL - Price: {bids_highest} (K {newestcandleK} < {newestcandleD} D)"
+                    bids_highest = round(
+                        float(client.get_orderbook_ticker(symbol=symbol)['bidPrice']), 4)
+                    msg = f"{bcolors.ALERT}SELL - Price Book: {bids_highest} (%K: {newestcandleK} < %D: {newestcandleD} ) and EMA {settings.trade_ema_low}: {emaLow} <  EMA {settings.trade_ema_high}: {emaHigh}){bcolors.ENDC}"
                     print(msg)
                     ticks = {}
                     for filt in client.get_symbol_info(crypto + alt)['filters']:
