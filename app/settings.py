@@ -8,7 +8,7 @@ telegram_token = getenv('TELEGRAM_TOKEN', '')
 telegram_chatid = getenv('TELEGRAM_CHATID', '')
 
 trade_coin = getenv('TRADE_COIN', 'BUSD')
-trade_crypto = getenv('TRADE_CRYPTO', 'CHZ')
+trade_crypto = getenv('TRADE_CRYPTO', 'BTC')
 trade_time_frame = getenv('TRADE_TIME_FRAME', "15m")
 trade_market = getenv('TRADE_MARKET', 0)
 
@@ -18,11 +18,11 @@ trade_rsi_k = int(getenv('TRADE_RSI_K', 3))
 trade_rsi_d = int(getenv('TRADE_RSI_D', 3))
 
 trade_ema_cross = int(getenv('TRADE_EMA_CROSS', 0))
-trade_ema_low = int(getenv('TRADE_EMA_LOW', 3))
-trade_ema_high = int(getenv('TRADE_EMA_HIGH', 6))
+trade_ema_low = int(getenv('TRADE_EMA_LOW', 2))
+trade_ema_high = int(getenv('TRADE_EMA_HIGH', 4))
 
-trade_ema_base_candle = int(getenv('TRADE_EMA_BASE_CANDLE', 1))
+trade_ema_base_candle = int(getenv('TRADE_EMA_BASE_CANDLE', 0))
 trade_ema_base_candle_value = int(getenv('TRADE_EMA_BASE_CANDLE_VALUE', 8))
 trade_ema_base_candle_qtd = int(getenv('TRADE_EMA_BASE_CANDLE_QTD', 2))
 
-notification_only = getenv('NOTIFICATION_ONLY', 0)
+notification_only = getenv('NOTIFICATION_ONLY', 1)
