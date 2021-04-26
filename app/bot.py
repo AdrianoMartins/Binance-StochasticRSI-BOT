@@ -232,6 +232,8 @@ def main():
 
     lastStatus = 0
     lastCloseTrade = None
+    lastCloseTradeUp = None
+    lastCloseTradeDown = None
     lastCloseUpSUM = 0
     lastCloseDownSUM = 0
     validateBuy = False
@@ -289,19 +291,20 @@ def main():
                 wmaHigh = round(
                     float((talib.WMA(df['close'], timeperiod=settings.trade_wma_high)).iloc[-1]), 8)
                 # Trade Validator
-                if wmaLow > wmaMiddle:
+                if float(wmaLow) > float(wmaMiddle):
                     lastClose = df.timeend.iloc[-1]
-                    if lastClose != lastCloseTrade:
-                        lastCloseTrade = lastClose
+                    if lastClose != lastCloseTradeUp:
+                        lastCloseTradeUp = lastClose
                         lastCloseUpSUM += 1
                     if lastCloseUpSUM == settings.trade_wma_cross_candle_qtd:
                         validateBuy = (newestcandleK > newestcandleD)
                 else:
                     lastCloseUpSUM = 0
                     validateBuy = False
-                if wmaHigh < wmaLow:
+                    lastCloseTradeUp = None
+                if float(wmaLow) < float(wmaHigh):
                     lastClose = df.timeend.iloc[-1]
-                    if lastClose != lastCloseTrade:
+                    if lastClose != lastCloseTradeDown:
                         lastCloseTrade = lastClose
                         lastCloseDownSUM += 1
                     if lastCloseDownSUM == settings.trade_wma_cross_candle_qtd:
@@ -309,6 +312,7 @@ def main():
                 else:
                     lastCloseDownSUM = 0
                     validateSell = False
+                    lastCloseTradeDown = None
                 statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - WMA {settings.trade_wma_low}: {wmaLow} - WMA {settings.trade_wma_middle}: {wmaMiddle} - WMA {settings.trade_wma_high}: {wmaHigh}"
 
             if settings.trade_ema_cross:
