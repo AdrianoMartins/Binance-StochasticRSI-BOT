@@ -358,9 +358,12 @@ def main():
                         lastCloseUpSUM += 1
                     if lastCloseUpSUM == settings.trade_stochrsi_base_candle_qtd:
                         validateBuy = True
+                        validateSell = False
+                        lastCloseUpSUM = 0
+                        lastCloseTradeUp = None
                 else:
-                    lastCloseUpSUM = 0
                     validateBuy = False
+                    lastCloseUpSUM = 0
                     lastCloseTradeUp = None
                 if float(newestcandleK) < float(newestcandleD):
                     lastClose = df.timeend.iloc[-1]
@@ -369,9 +372,12 @@ def main():
                         lastCloseDownSUM += 1
                     if lastCloseDownSUM == settings.trade_stochrsi_base_candle_qtd:
                         validateSell = True
+                        validateBuy = False
+                        lastCloseDownSUM = 0
+                        lastCloseTradeDown = None
                 else:
+                    validateSell = False
                     lastCloseDownSUM = 0
-                    validateBuy = False
                     lastCloseTradeDown = None
                 statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD}"
 
