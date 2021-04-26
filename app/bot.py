@@ -272,22 +272,22 @@ def main():
             newestcandleend = df.timeend.astype(
                 str).iloc[-1]  # gets current time?
             newestcandleclose = round(
-                float(df.close.iloc[-1]), 4)  # gets last close
+                float(df.close.iloc[-1]), 8)  # gets last close
             newestcandleRSI = round(
-                float(df.rsi.astype(str).iloc[-1]), 4)  # gets last rsi
+                float(df.rsi.astype(str).iloc[-1]), 8)  # gets last rsi
             newestcandleK = round(float(df.MyStochrsiK.astype(
-                str).iloc[-1]), 4)  # gets last rsi
+                str).iloc[-1]), 8)  # gets last rsi
             newestcandleD = round(float(df.MyStochrsiD.astype(
-                str).iloc[-1]), 4)  # gets last rsi
+                str).iloc[-1]), 8)  # gets last rsi
 
             if settings.trade_wma_cross:
                 # Compute WMAs
                 wmaLow = round(
-                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_low)).iloc[-1]), 4)
+                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_low)).iloc[-1]), 8)
                 wmaMiddle = round(
-                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_middle)).iloc[-1]), 4)
+                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_middle)).iloc[-1]), 8)
                 wmaHigh = round(
-                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_high)).iloc[-1]), 4)
+                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_high)).iloc[-1]), 8)
                 # Trade Validator
                 validateBuy = (newestcandleK > newestcandleD) and (
                     wmaLow > wmaMiddle)
@@ -298,9 +298,9 @@ def main():
             if settings.trade_ema_cross:
                 # Compute EMAs
                 emaLow = round(
-                    float((talib.EMA(df['close'], timeperiod=settings.trade_ema_low)).iloc[-1]), 4)
+                    float((talib.EMA(df['close'], timeperiod=settings.trade_ema_low)).iloc[-1]), 8)
                 emaHigh = round(
-                    float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 4)
+                    float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 8)
                 # Trade Validator
                 validateBuy = (newestcandleK > newestcandleD) and (
                     emaLow > emaHigh)
@@ -342,7 +342,7 @@ def main():
                 if lastStatus != 1:
                     lastStatus = 1
                     asks_lowest = round(
-                        float(client.get_orderbook_ticker(symbol=symbol)['askPrice']), 4)
+                        float(client.get_orderbook_ticker(symbol=symbol)['askPrice']), 8)
                     msg = f"{bcolors.OKGREEN}BUY - Price Book: {asks_lowest}{bcolors.ENDC}"
                     print(msg)
                     ticks = {}
@@ -374,7 +374,7 @@ def main():
                 if lastStatus != 2:
                     lastStatus = 2
                     bids_highest = round(
-                        float(client.get_orderbook_ticker(symbol=symbol)['bidPrice']), 4)
+                        float(client.get_orderbook_ticker(symbol=symbol)['bidPrice']), 8)
                     msg = f"{bcolors.ALERT}SELL - Price Book: {bids_highest}{bcolors.ENDC}"
                     print(msg)
                     ticks = {}
