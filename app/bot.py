@@ -351,8 +351,28 @@ def main():
                 statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh} - EMA {settings.trade_ema_base_candle_value}: {emaBaseClosed}"
 
             if not settings.trade_ema_base_candle and not settings.trade_ema_cross and not settings.trade_wma_cross:
-                validateBuy = (newestcandleK > newestcandleD)
-                validateSell = (newestcandleK < newestcandleD)
+                if float(newestcandleK) > float(newestcandleD):
+                    lastClose = df.timeend.iloc[-1]
+                    if lastClose != lastCloseTradeUp:
+                        lastCloseTradeUp = lastClose
+                        lastCloseUpSUM += 1
+                    if lastCloseUpSUM == settings.trade_stochrsi_base_candle_qtd:
+                        validateBuy = True
+                else:
+                    lastCloseUpSUM = 0
+                    validateBuy = False
+                    lastCloseTradeUp = None
+                if float(newestcandleK) < float(newestcandleD):
+                    lastClose = df.timeend.iloc[-1]
+                    if lastClose != lastCloseTradeDown:
+                        lastCloseTradeDown = lastClose
+                        lastCloseDownSUM += 1
+                    if lastCloseDownSUM == settings.trade_stochrsi_base_candle_qtd:
+                        validateSell = True
+                else:
+                    lastCloseDownSUM = 0
+                    validateBuy = False
+                    lastCloseTradeDown = None
                 statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD}"
 
             print(statusMsg)
@@ -377,7 +397,8 @@ def main():
                         balance = float(settings.trade_limit_coin_balance)
                     else:
                         balance = get_currency_balance(client, alt)
-                    order_quantity = ((math.floor(balance * 10 ** ticks[alt] / float(asks_lowest)) / float(10 ** ticks[alt])))
+                    order_quantity = ((math.floor(
+                        balance * 10 ** ticks[alt] / float(asks_lowest)) / float(10 ** ticks[alt])))
                     if order_quantity > 0 or int(settings.notification_only) == 1:
                         if int(settings.notification_only) == 1:
                             msg = f"Notification: Buy {order_quantity} of {crypto} at {asks_lowest} {alt}"

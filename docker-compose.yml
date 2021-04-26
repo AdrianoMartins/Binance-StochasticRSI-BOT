@@ -18,6 +18,7 @@ services:
       TRADE_RSI_STOCH: 14
       TRADE_RSI_K: 3
       TRADE_RSI_D: 3
+      TRADE_STOCHRSI_CROSS_CANDLE_QTD: 2
       TRADE_EMA_CROSS: 0
       TRADE_EMA_LOW: 2
       TRADE_EMA_HIGH: 4

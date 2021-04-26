@@ -17,6 +17,7 @@ trade_rsi_ifr = int(getenv('TRADE_RSI_IFR', 14))
 trade_rsi_stochastic = int(getenv('TRADE_RSI_STOCH', 14))
 trade_rsi_k = int(getenv('TRADE_RSI_K', 3))
 trade_rsi_d = int(getenv('TRADE_RSI_D', 3))
+trade_stochrsi_base_candle_qtd = int(getenv('TRADE_STOCHRSI_CROSS_CANDLE_QTD', 2))
 
 trade_ema_cross = int(getenv('TRADE_EMA_CROSS', 0))
 trade_ema_low = int(getenv('TRADE_EMA_LOW', 2))
