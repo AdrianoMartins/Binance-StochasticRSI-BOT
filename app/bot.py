@@ -289,10 +289,26 @@ def main():
                 wmaHigh = round(
                     float((talib.WMA(df['close'], timeperiod=settings.trade_wma_high)).iloc[-1]), 8)
                 # Trade Validator
-                validateBuy = (newestcandleK > newestcandleD) and (
-                    wmaLow > wmaMiddle)
-                validateSell = (newestcandleK < newestcandleD) and (
-                    wmaHigh < wmaLow)
+                if wmaLow > wmaMiddle:
+                    lastClose = df.timeend.iloc[-1]
+                    if lastClose != lastCloseTrade:
+                        lastCloseTrade = lastClose
+                        lastCloseUpSUM += 1
+                    if lastCloseUpSUM == settings.trade_wma_cross_candle_qtd:
+                        validateBuy = (newestcandleK > newestcandleD)
+                else:
+                    lastCloseUpSUM = 0
+                    validateBuy = False
+                if wmaHigh < wmaLow:
+                    lastClose = df.timeend.iloc[-1]
+                    if lastClose != lastCloseTrade:
+                        lastCloseTrade = lastClose
+                        lastCloseDownSUM += 1
+                    if lastCloseDownSUM == settings.trade_wma_cross_candle_qtd:
+                        validateSell = (newestcandleK < newestcandleD)
+                else:
+                    lastCloseDownSUM = 0
+                    validateSell = False
                 statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - WMA {settings.trade_wma_low}: {wmaLow} - WMA {settings.trade_wma_middle}: {wmaMiddle} - WMA {settings.trade_wma_high}: {wmaHigh}"
 
             if settings.trade_ema_cross:
@@ -355,7 +371,7 @@ def main():
                             break
                     if settings.trade_limit_coin_balance:
                         balance = float(settings.trade_limit_coin_balance)
-                    else: 
+                    else:
                         balance = get_currency_balance(client, alt)
                     order_quantity = ((math.floor(balance * 10 ** ticks[alt] / float(asks_lowest)) / float(10 ** ticks[alt])))
                     if order_quantity > 0 or int(settings.notification_only) == 1:

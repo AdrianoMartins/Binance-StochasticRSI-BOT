@@ -30,5 +30,6 @@ trade_wma_cross = int(getenv('TRADE_WMA_CROSS', 0))
 trade_wma_low = int(getenv('TRADE_WMA_LOW', 2))
 trade_wma_middle = int(getenv('TRADE_WMA_MIDDLE', 10))
 trade_wma_high = int(getenv('TRADE_WMA_HIGH', 11))
+trade_wma_cross_candle_qtd = int(getenv('TRADE_WMA_CROSS_CANDLE_QTD', 2))
 
 notification_only = getenv('NOTIFICATION_ONLY', 1)
