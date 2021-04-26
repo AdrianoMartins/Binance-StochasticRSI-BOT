@@ -280,21 +280,39 @@ def main():
             newestcandleD = round(float(df.MyStochrsiD.astype(
                 str).iloc[-1]), 4)  # gets last rsi
 
-            # Compute EMAs
-            emaLow = round(
-                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_low)).iloc[-1]), 4)
-            emaHigh = round(
-                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 4)
-            emaBaseClosed = round(
-                float((talib.EMA(df['close'], timeperiod=settings.trade_ema_base_candle_value)).iloc[-1]), 4)
-
-            print(f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - %K: {newestcandleK} - %D: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh} - EMA {settings.trade_ema_base_candle_value}: {emaBaseClosed}")
+            if settings.trade_wma_cross:
+                # Compute WMAs
+                wmaLow = round(
+                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_low)).iloc[-1]), 4)
+                wmaMiddle = round(
+                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_middle)).iloc[-1]), 4)
+                wmaHigh = round(
+                    float((talib.WMA(df['close'], timeperiod=settings.trade_wma_high)).iloc[-1]), 4)
+                # Trade Validator
+                validateBuy = (newestcandleK > newestcandleD) and (
+                    wmaLow > wmaMiddle)
+                validateSell = (newestcandleK < newestcandleD) and (
+                    wmaHigh < wmaLow)
+                statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - WMA {settings.trade_wma_low}: {wmaLow} - WMA {settings.trade_wma_middle}: {wmaMiddle} - WMA {settings.trade_wma_high}: {wmaHigh}"
 
             if settings.trade_ema_cross:
-                validateBuy = (newestcandleK > newestcandleD) and (emaLow > emaHigh)
-                validateSell = (newestcandleK < newestcandleD) and (emaLow < emaHigh)
-            
+                # Compute EMAs
+                emaLow = round(
+                    float((talib.EMA(df['close'], timeperiod=settings.trade_ema_low)).iloc[-1]), 4)
+                emaHigh = round(
+                    float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 4)
+                # Trade Validator
+                validateBuy = (newestcandleK > newestcandleD) and (
+                    emaLow > emaHigh)
+                validateSell = (newestcandleK < newestcandleD) and (
+                    emaLow < emaHigh)
+                statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh}"
+
             if settings.trade_ema_base_candle:
+                # Compute EMA
+                emaBaseClosed = round(
+                    float((talib.EMA(df['close'], timeperiod=settings.trade_ema_base_candle_value)).iloc[-1]), 8)
+                # Trade Validator
                 lastClose = df.timeend.iloc[-1]
                 if lastClose != lastCloseTrade:
                     lastCloseTrade = lastClose
@@ -306,16 +324,18 @@ def main():
                         lastCloseDownSUM = lastCloseDownSUM + 1
                     else:
                         lastCloseDownSUM = 0
-                else:
-                    pass
                 if lastCloseUpSUM == settings.trade_ema_base_candle_qtd:
                     validateBuy = (newestcandleK > newestcandleD)
                 if lastCloseDownSUM == settings.trade_ema_base_candle_qtd:
                     validateSell = (newestcandleK < newestcandleD)
-            
-            if not settings.trade_ema_base_candle and not settings.trade_ema_cross:
+                statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh} - EMA {settings.trade_ema_base_candle_value}: {emaBaseClosed}"
+
+            if not settings.trade_ema_base_candle and not settings.trade_ema_cross and not settings.trade_wma_cross:
                 validateBuy = (newestcandleK > newestcandleD)
                 validateSell = (newestcandleK < newestcandleD)
+                statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD}"
+
+            print(statusMsg)
 
             result = None
             if validateBuy:
@@ -333,8 +353,11 @@ def main():
                             else:
                                 ticks[alt] = filt['stepSize'].find('1') - 1
                             break
-                    order_quantity = ((math.floor(get_currency_balance(
-                        client, alt) * 10 ** ticks[alt] / float(asks_lowest)) / float(10 ** ticks[alt])))
+                    if settings.trade_limit_coin_balance:
+                        balance = float(settings.trade_limit_coin_balance)
+                    else: 
+                        balance = get_currency_balance(client, alt)
+                    order_quantity = ((math.floor(balance * 10 ** ticks[alt] / float(asks_lowest)) / float(10 ** ticks[alt])))
                     if order_quantity > 0 or int(settings.notification_only) == 1:
                         if int(settings.notification_only) == 1:
                             msg = f"Notification: Buy {order_quantity} of {crypto} at {asks_lowest} {alt}"
