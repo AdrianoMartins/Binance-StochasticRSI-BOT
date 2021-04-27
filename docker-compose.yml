@@ -11,6 +11,8 @@ services:
       TELEGRAM_TOKEN: ""
       TELEGRAM_CHATID: ""
       TRADE_TIME_FRAME: "15m" # 1m, 5m, 15m, 1h, 6h, etc.
+      TRADE_TIME_FRAME_UPPER_VALIDATOR: 1
+      TRADE_TIME_FRAME_UPPER_VALIDATOR_VALUE: "1h" # 1m, 5m, 15m, 1h, 6h, etc.
       TRADE_MARKET: 1
       TRADE_COIN: "BUSD"
       TRADE_CRYPTO: "BTC"

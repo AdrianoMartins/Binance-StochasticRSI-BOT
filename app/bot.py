@@ -282,6 +282,35 @@ def main():
             newestcandleD = round(float(df.MyStochrsiD.astype(
                 str).iloc[-1]), 8)  # gets last rsi
 
+            if settings.trade_upper_stoch_validador:
+                # Get Binance Data into dataframe
+                KLINE_INTERVAL_UPPER = settings.trade_upper_stoch_validador_value
+                candlesUpper = client.get_klines(
+                    symbol=symbol, interval=KLINE_INTERVAL_UPPER)
+                dfUpper = pd.DataFrame(candlesUpper)
+                dfUpper.columns = ['timestart', 'open', 'high', 'low',
+                            'close', '?', 'timeend', '?', '?', '?', '?', '?']
+                dfUpper.timestart = [datetime.datetime.fromtimestamp(
+                    i/1000) for i in dfUpper.timestart.values]
+                dfUpper.timeend = [datetime.datetime.fromtimestamp(
+                    i/1000) for i in dfUpper.timeend.values]
+
+                # Compute RSI after fixing data
+                float_data_upper = [float(x) for x in dfUpper.close.values]
+                np_float_data_upper = np.array(float_data_upper)
+                rsiUpper = talib.RSI(np_float_data_upper, settings.trade_rsi_ifr)
+                dfUpper['rsi'] = rsiUpper
+
+                # Compute StochRSI using RSI values in Stochastic function
+                mystochrsiUpper = Stoch(dfUpper.rsi, dfUpper.rsi, dfUpper.rsi, settings.trade_rsi_k,
+                                settings.trade_rsi_d, settings.trade_rsi_stochastic)
+                dfUpper['MyStochrsiK'], dfUpper['MyStochrsiD'] = mystochrsiUpper
+
+                newestcandleKUpper = round(float(dfUpper.MyStochrsiK.astype(
+                    str).iloc[-1]), 8)  # gets last rsi
+                newestcandleDUpper = round(float(dfUpper.MyStochrsiD.astype(
+                    str).iloc[-1]), 8)  # gets last rsi
+
             if settings.trade_wma_cross:
                 # Compute WMAs
                 wmaLow = round(
@@ -297,7 +326,10 @@ def main():
                         lastCloseTradeUp = lastClose
                         lastCloseUpSUM += 1
                     if lastCloseUpSUM == settings.trade_wma_cross_candle_qtd:
-                        validateBuy = (newestcandleK > newestcandleD)
+                        if settings.trade_upper_stoch_validador:
+                            validateBuy = (float(newestcandleK) > float(newestcandleD)) and (float(newestcandleKUpper) > float(newestcandleDUpper))
+                        else:
+                            validateBuy = float(newestcandleK) > float(newestcandleD)
                         validateSell = False
                         lastCloseUpSUM = 0
                         lastCloseTradeUp = None
@@ -311,8 +343,10 @@ def main():
                         lastCloseTrade = lastClose
                         lastCloseDownSUM += 1
                     if lastCloseDownSUM == settings.trade_wma_cross_candle_qtd:
-                        validateSell = float(
-                            newestcandleK) < float(newestcandleD)
+                        if settings.trade_upper_stoch_validador:
+                            validateSell = (float(newestcandleK) < float(newestcandleD)) and (float(newestcandleKUpper) < float(newestcandleDUpper)) 
+                        else:
+                            validateSell = float(newestcandleK) < float(newestcandleD)
                         validateBuy = False
                         lastCloseDownSUM = 0
                         lastCloseTradeDown = None
@@ -329,10 +363,16 @@ def main():
                 emaHigh = round(
                     float((talib.EMA(df['close'], timeperiod=settings.trade_ema_high)).iloc[-1]), 8)
                 # Trade Validator
-                validateBuy = (newestcandleK > newestcandleD) and (
-                    emaLow > emaHigh)
-                validateSell = (newestcandleK < newestcandleD) and (
-                    emaLow < emaHigh)
+                if settings.trade_upper_stoch_validador:
+                    validateBuy = (float(newestcandleK) > float(newestcandleD)) and (
+                        emaLow > emaHigh) and (float(newestcandleKUpper) > float(newestcandleDUpper)) 
+                    validateSell = (float(newestcandleK) < float(newestcandleD)) and (
+                        emaLow < emaHigh) and (float(newestcandleKUpper) < float(newestcandleDUpper)) 
+                else:
+                    validateBuy = (float(newestcandleK) > float(newestcandleD)) and (
+                        emaLow > emaHigh)
+                    validateSell = (newestcandleK < newestcandleD) and (
+                        emaLow < emaHigh)
                 statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh}"
 
             if settings.trade_ema_base_candle:
@@ -352,47 +392,84 @@ def main():
                     else:
                         lastCloseDownSUM = 0
                 if lastCloseUpSUM == settings.trade_ema_base_candle_qtd:
-                    validateBuy = (newestcandleK > newestcandleD)
+                    if settings.trade_upper_stoch_validador:
+                        validateBuy = (float(newestcandleK) > float(newestcandleD)) and (float(newestcandleKUpper) > float(newestcandleDUpper))
+                    else:
+                        validateBuy = (float(newestcandleK) > float(newestcandleD))
                     validateSell = False
                     lastCloseUpSUM = 0
                     lastCloseTrade = None
                 if lastCloseDownSUM == settings.trade_ema_base_candle_qtd:
-                    validateSell = float(newestcandleK) < float(newestcandleD)
+                    if settings.trade_upper_stoch_validador:
+                        validateSell = float(newestcandleK) < float(newestcandleD) and (float(newestcandleKUpper) < float(newestcandleDUpper))
+                    else:
+                        validateSell = float(newestcandleK) < float(newestcandleD)
                     validateBuy = False
                     lastCloseDownSUM = 0
                     lastCloseTrade = None
                 statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh} - EMA {settings.trade_ema_base_candle_value}: {emaBaseClosed}"
 
             if not settings.trade_ema_base_candle and not settings.trade_ema_cross and not settings.trade_wma_cross:
-                if float(newestcandleK) > float(newestcandleD):
-                    lastClose = df.timeend.iloc[-1]
-                    if lastClose != lastCloseTradeUp:
-                        lastCloseTradeUp = lastClose
-                        lastCloseUpSUM += 1
-                    if lastCloseUpSUM == settings.trade_stochrsi_base_candle_qtd:
-                        validateBuy = True
-                        validateSell = False
+                if settings.trade_upper_stoch_validador:
+                    if (float(newestcandleK) > float(newestcandleD)) and (float(newestcandleKUpper) > float(newestcandleDUpper)):
+                        lastClose = df.timeend.iloc[-1]
+                        if lastClose != lastCloseTradeUp:
+                            lastCloseTradeUp = lastClose
+                            lastCloseUpSUM += 1
+                        if lastCloseUpSUM == settings.trade_stochrsi_base_candle_qtd:
+                            validateBuy = True
+                            validateSell = False
+                            lastCloseUpSUM = 0
+                            lastCloseTradeUp = None
+                    else:
+                        validateBuy = False
                         lastCloseUpSUM = 0
                         lastCloseTradeUp = None
-                else:
-                    validateBuy = False
-                    lastCloseUpSUM = 0
-                    lastCloseTradeUp = None
-                if float(newestcandleK) < float(newestcandleD):
-                    lastClose = df.timeend.iloc[-1]
-                    if lastClose != lastCloseTradeDown:
-                        lastCloseTradeDown = lastClose
-                        lastCloseDownSUM += 1
-                    if lastCloseDownSUM == settings.trade_stochrsi_base_candle_qtd:
-                        validateSell = True
-                        validateBuy = False
+                    if (float(newestcandleK) < float(newestcandleD)) and (float(newestcandleKUpper) < float(newestcandleDUpper)):
+                        lastClose = df.timeend.iloc[-1]
+                        if lastClose != lastCloseTradeDown:
+                            lastCloseTradeDown = lastClose
+                            lastCloseDownSUM += 1
+                        if lastCloseDownSUM == settings.trade_stochrsi_base_candle_qtd:
+                            validateSell = True
+                            validateBuy = False
+                            lastCloseDownSUM = 0
+                            lastCloseTradeDown = None
+                    else:
+                        validateSell = False
                         lastCloseDownSUM = 0
                         lastCloseTradeDown = None
+                    statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - Upper K%: {newestcandleKUpper} - Upper D%: {newestcandleDUpper}"
                 else:
-                    validateSell = False
-                    lastCloseDownSUM = 0
-                    lastCloseTradeDown = None
-                statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD}"
+                    if (float(newestcandleK) > float(newestcandleD)):
+                        lastClose = df.timeend.iloc[-1]
+                        if lastClose != lastCloseTradeUp:
+                            lastCloseTradeUp = lastClose
+                            lastCloseUpSUM += 1
+                        if lastCloseUpSUM == settings.trade_stochrsi_base_candle_qtd:
+                            validateBuy = True
+                            validateSell = False
+                            lastCloseUpSUM = 0
+                            lastCloseTradeUp = None
+                    else:
+                        validateBuy = False
+                        lastCloseUpSUM = 0
+                        lastCloseTradeUp = None
+                    if (float(newestcandleK) < float(newestcandleD)):
+                        lastClose = df.timeend.iloc[-1]
+                        if lastClose != lastCloseTradeDown:
+                            lastCloseTradeDown = lastClose
+                            lastCloseDownSUM += 1
+                        if lastCloseDownSUM == settings.trade_stochrsi_base_candle_qtd:
+                            validateSell = True
+                            validateBuy = False
+                            lastCloseDownSUM = 0
+                            lastCloseTradeDown = None
+                    else:
+                        validateSell = False
+                        lastCloseDownSUM = 0
+                        lastCloseTradeDown = None
+                    statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD}"
 
             print(statusMsg)
 

@@ -33,4 +33,7 @@ trade_wma_middle = int(getenv('TRADE_WMA_MIDDLE', 10))
 trade_wma_high = int(getenv('TRADE_WMA_HIGH', 11))
 trade_wma_cross_candle_qtd = int(getenv('TRADE_WMA_CROSS_CANDLE_QTD', 2))
 
+trade_upper_stoch_validador = int(getenv('TRADE_TIME_FRAME_UPPER_VALIDATOR', 0))
+trade_upper_stoch_validador_value = getenv('TRADE_TIME_FRAME_UPPER_VALIDATOR_VALUE', "1h")
+
 notification_only = getenv('NOTIFICATION_ONLY', 1)
