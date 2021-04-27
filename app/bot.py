@@ -298,9 +298,12 @@ def main():
                         lastCloseUpSUM += 1
                     if lastCloseUpSUM == settings.trade_wma_cross_candle_qtd:
                         validateBuy = (newestcandleK > newestcandleD)
+                        validateSell = False
+                        lastCloseUpSUM = 0
+                        lastCloseTradeUp = None
                 else:
-                    lastCloseUpSUM = 0
                     validateBuy = False
+                    lastCloseUpSUM = 0
                     lastCloseTradeUp = None
                 if float(wmaLow) < float(wmaHigh):
                     lastClose = df.timeend.iloc[-1]
@@ -308,7 +311,11 @@ def main():
                         lastCloseTrade = lastClose
                         lastCloseDownSUM += 1
                     if lastCloseDownSUM == settings.trade_wma_cross_candle_qtd:
-                        validateSell = (newestcandleK < newestcandleD)
+                        validateSell = float(
+                            newestcandleK) < float(newestcandleD)
+                        validateBuy = False
+                        lastCloseDownSUM = 0
+                        lastCloseTradeDown = None
                 else:
                     lastCloseDownSUM = 0
                     validateSell = False
@@ -346,8 +353,14 @@ def main():
                         lastCloseDownSUM = 0
                 if lastCloseUpSUM == settings.trade_ema_base_candle_qtd:
                     validateBuy = (newestcandleK > newestcandleD)
+                    validateSell = False
+                    lastCloseUpSUM = 0
+                    lastCloseTrade = None
                 if lastCloseDownSUM == settings.trade_ema_base_candle_qtd:
-                    validateSell = (newestcandleK < newestcandleD)
+                    validateSell = float(newestcandleK) < float(newestcandleD)
+                    validateBuy = False
+                    lastCloseDownSUM = 0
+                    lastCloseTrade = None
                 statusMsg = f"Price: {newestcandleclose} - RSI: {newestcandleRSI} - K%: {newestcandleK} - D%: {newestcandleD} - EMA {settings.trade_ema_low}: {emaLow} - EMA {settings.trade_ema_high}: {emaHigh} - EMA {settings.trade_ema_base_candle_value}: {emaBaseClosed}"
 
             if not settings.trade_ema_base_candle and not settings.trade_ema_cross and not settings.trade_wma_cross:
