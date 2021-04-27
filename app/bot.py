@@ -344,7 +344,7 @@ def main():
                         lastCloseDownSUM += 1
                     if lastCloseDownSUM == settings.trade_wma_cross_candle_qtd:
                         if settings.trade_upper_stoch_validador:
-                            validateSell = (float(newestcandleK) < float(newestcandleD)) and (float(newestcandleKUpper) < float(newestcandleDUpper)) 
+                            validateSell = (float(newestcandleK) < float(newestcandleD)) 
                         else:
                             validateSell = float(newestcandleK) < float(newestcandleD)
                         validateBuy = False
@@ -367,7 +367,7 @@ def main():
                     validateBuy = (float(newestcandleK) > float(newestcandleD)) and (
                         emaLow > emaHigh) and (float(newestcandleKUpper) > float(newestcandleDUpper)) 
                     validateSell = (float(newestcandleK) < float(newestcandleD)) and (
-                        emaLow < emaHigh) and (float(newestcandleKUpper) < float(newestcandleDUpper)) 
+                        emaLow < emaHigh) 
                 else:
                     validateBuy = (float(newestcandleK) > float(newestcandleD)) and (
                         emaLow > emaHigh)
@@ -401,7 +401,7 @@ def main():
                     lastCloseTrade = None
                 if lastCloseDownSUM == settings.trade_ema_base_candle_qtd:
                     if settings.trade_upper_stoch_validador:
-                        validateSell = float(newestcandleK) < float(newestcandleD) and (float(newestcandleKUpper) < float(newestcandleDUpper))
+                        validateSell = float(newestcandleK) < float(newestcandleD)
                     else:
                         validateSell = float(newestcandleK) < float(newestcandleD)
                     validateBuy = False
@@ -425,7 +425,7 @@ def main():
                         validateBuy = False
                         lastCloseUpSUM = 0
                         lastCloseTradeUp = None
-                    if (float(newestcandleK) < float(newestcandleD)) and (float(newestcandleKUpper) < float(newestcandleDUpper)):
+                    if (float(newestcandleK) < float(newestcandleD)):
                         lastClose = df.timeend.iloc[-1]
                         if lastClose != lastCloseTradeDown:
                             lastCloseTradeDown = lastClose
