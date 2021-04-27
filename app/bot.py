@@ -447,8 +447,7 @@ def main():
                                 ticks[alt] = filt['stepSize'].find(
                                     '1') - 1
                             break
-                    order_quantity = math.floor(
-                        get_currency_balance(client, crypto))
+                    order_quantity = get_currency_balance(client, crypto)
                     if order_quantity > 0 or int(settings.notification_only) == 1:
                         if int(settings.notification_only) == 1:
                             msg = f"Notification: Sell {order_quantity} of {crypto} at {bids_highest} {alt}"
